@@ -130,7 +130,6 @@ This Hospital Management System is built using Golang with the Gin framework for
    git clone [https://github.com/yourusername/hospital-management-system.git](https://github.com/Mayank-Tiwari01/CRUD-Golang.git)
    cd CRUD-Golang
 
-///////////
 2. Set up the database:
    - Create a MySQL/Postgres database named `MayankDB`. (or make one of your choice and make the required changes in the code)
      
