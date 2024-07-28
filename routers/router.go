@@ -23,9 +23,5 @@ func SetupRouter() *gin.Engine {
 	router.GET("/fetchPatientByDoctorId/:doctor_id", controllers.GetPatientsByDoctorID)
 	router.DELETE("/patient/:id", controllers.DeletePatient)
 	router.GET("/searchPatientByName", controllers.SearchPatientByName)
-
-	// Combined Route
-	router.GET("/getPatientsByDoctor", controllers.GetPatientsByDoctorIDOrName)
-
 	return router
 }

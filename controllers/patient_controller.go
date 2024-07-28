@@ -41,30 +41,44 @@ func UpdatePatient(c *gin.Context) {
 	var patient models.Patient
 	id := c.Param("id")
 
+	// Find the patient in the database using the ID
 	if err := config.DB.First(&patient, "id = ?", id).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Patient not found!"})
 		return
 	}
 
+	// Define an anonymous struct to hold the incoming JSON input
 	var input struct {
-		Name      string `json:"name"`
-		ContactNo string `json:"contact_no"`
-		Address   string `json:"address"`
-		DoctorID  string `json:"doctor_id"`
+		Name      *string `json:"name"`
+		ContactNo *string `json:"contact_no"`
+		Address   *string `json:"address"`
+		DoctorID  *string `json:"doctor_id"`
 	}
+
+	// Bind the JSON input to the input struct
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	patient.Name = input.Name
-	patient.ContactNo = input.ContactNo
-	patient.Address = input.Address
-	patient.DoctorID = input.DoctorID
-	patient.UpdatedAt = time.Now()
+	// Update the patient fields only if the input is not nil
+	if input.Name != nil {
+		patient.Name = *input.Name
+	}
+	if input.ContactNo != nil {
+		patient.ContactNo = *input.ContactNo
+	}
+	if input.Address != nil {
+		patient.Address = *input.Address
+	}
+	if input.DoctorID != nil {
+		patient.DoctorID = *input.DoctorID
+	}
+	patient.UpdatedAt = time.Now() // Update the UpdatedAt timestamp
 
+	// Save the updated patient to the database
 	config.DB.Save(&patient)
-	c.JSON(http.StatusOK, patient)
+	c.JSON(http.StatusOK, patient) // Return the updated patient as JSON
 }
 
 func DeletePatient(c *gin.Context) {
@@ -98,37 +112,5 @@ func SearchPatientByName(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, patients)
-}
-func GetPatientsByDoctorIDOrName(c *gin.Context) {
-	var patients []models.Patient
-	doctorID := c.Query("doctor_id")
-	doctorName := c.Query("doctor_name")
-
-	if doctorID != "" {
-		if err := config.DB.Where("doctor_id = ?", doctorID).Find(&patients).Error; err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "No patients found for the given doctor ID"})
-			return
-		}
-	} else if doctorName != "" {
-		var doctor models.Doctor
-		if err := config.DB.Where("name = ?", doctorName).First(&doctor).Error; err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Doctor not found!"})
-			return
-		}
-		if err := config.DB.Where("doctor_id = ?", doctor.ID).Find(&patients).Error; err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "No patients found for the given doctor name"})
-			return
-		}
-	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Please provide a doctor ID or name"})
-		return
-	}
-
-	if len(patients) == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "No patients found"})
-		return
-	}
-
 	c.JSON(http.StatusOK, patients)
 }
