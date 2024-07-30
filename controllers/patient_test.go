@@ -13,7 +13,7 @@ import (
 
 func TestCreatePatient(t *testing.T) {
 	// Set up Gin router and routes for testing
-
+	// not working
 	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 	r.POST("/patient/", CreatePatient)
